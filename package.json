@@ -8,7 +8,7 @@
   "private": true,
   "scripts": {
     "lint:js": "eslint .",
-    "start": "webpack && go run *.go",
+    "start": "go run *.go",
     "build": "webpack && go build -ldflags=\"-s -w\"",
     "build:go": "go build -ldflags=\"-s -w\"",
     "build:js": "webpack",

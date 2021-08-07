@@ -2,6 +2,8 @@ package main
 
 import (
 	_ "embed"
+	"log"
+	"os"
 	"strings"
 
 	"github.com/webview/webview"
@@ -22,13 +24,18 @@ const html = `
 		font-family: -apple-system,BlinkMacSystemFont,"Segoe UI",
 		  Ubuntu,Cantarell,Oxygen-Sans,"Helvetica Neue",Arial,Roboto,sans-serif;
 	}
+	* { margin: 0; padding: 0; }
   </style>
 </head>
 <body><div id="app"></div><script>initiateReact()</script></body>
 </html>
 `
 
+//go:embed dist/main.js
+var js string
 var w webview.WebView
+
+const REQ_URL string = "http://localhost:7292" // TODO: Add some config around this.
 
 // var file = ""
 
@@ -38,13 +45,17 @@ func ParseToJsString(s string) string {
 	return "\"" + strings.ReplaceAll(strings.ReplaceAll(s, "\\", "\\\\"), "\"", "\\\"") + "\""
 }
 
-//go:embed dist/main.js
-var js string
-
-// SetFile sets the value of the file variable in both Go and React.
-// func SetFile(value string) {file = value;w.Eval("setFileReact(" + ParseToJsString(value) + ")")}
+// SetToken sets the value of the config.Token variable in both Go and React.
+func SetToken(value string) {
+	config.Token = value
+	w.Eval("setTokenReact(" + ParseToJsString(value) + ")")
+}
 
 func main() {
+	jsLogger := log.New(os.Stderr, "client: ", log.LstdFlags)
+	log.SetPrefix("native: ")
+	ReadConfig()
+
 	debug := true
 	w = webview.New(debug)
 	defer w.Destroy()
@@ -52,10 +63,17 @@ func main() {
 	w.SetSize(325, 525, webview.HintMin)
 
 	// Bind variables.
-	// w.Bind("setFileGo", func(newFile string) {file = newFile})
+	w.Bind("setTokenGo", func(newToken string) { config.Token = newToken })
 
 	// Bind a function to initiate React via webview.Eval.
-	w.Bind("initiateReact", func() { w.Eval(js) })
+	w.Bind("initiateReact", func() {
+		w.Eval("window.token = " + ParseToJsString(config.Token))
+		w.Eval("window.reqUrl = " + ParseToJsString(REQ_URL))
+		w.Eval(js)
+	})
+	w.Bind("log", func(output interface{}) {
+		jsLogger.Println(output)
+	})
 
 	w.Navigate("data:text/html," + html)
 	w.Run()
