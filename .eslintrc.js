@@ -3,6 +3,7 @@ module.exports = {
     es6: true,
     browser: true
   },
+  globals: { reqUrl: 'readonly' },
   extends: ['plugin:react/recommended', 'standard', 'standard-react', 'standard-jsx'],
   plugins: ['react-hooks'],
   parserOptions: {

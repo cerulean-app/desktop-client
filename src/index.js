@@ -35,9 +35,10 @@ const App = () => {
     return setCacheReact(cache)
   }
 
+  useEffect(() => { if (token) setCheckingToken(true) }, [token])
   useEffect(() => {
     if (checkingToken) {
-      fetch(window.reqUrl + '/todos', { headers: { authorization: token } })
+      fetch(reqUrl + '/todos', { headers: { authorization: token } })
         .then(res => {
           if (res.ok) {
             res.json().then(resp => {

@@ -12,7 +12,8 @@ width: 100%;
 font-size: 14px;
 `
 
-/* const placeholderStyle = css`
+/* https://medium.com/codex/how-to-style-an-input-field-with-css-only-tips-and-techniques-e6a00e9dcc50
+const placeholderStyle = css`
 position: absolute;
 left: 12px;
 bottom: 50%;
