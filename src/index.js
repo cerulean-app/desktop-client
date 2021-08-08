@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import ReactDOM from 'react-dom'
 import Loading from './loading'
+import Todos from './todos'
 import Home from './home'
 import CacheContext from './cacheContext'
 import TokenContext from './tokenContext'
@@ -45,11 +46,9 @@ const App = () => {
               setNetworkFailure(false)
               setCheckingToken(false)
               setCache(resp)
-              window.setCacheGo(resp)
             })
-          } else if (!res.ok && res.status === 401) {
+          } else if (res.status === 401) {
             setToken('')
-            window.setTokenGo('')
             setCheckingToken(false)
             setNetworkFailure(false)
           } else {
@@ -69,7 +68,7 @@ const App = () => {
       <CacheContext.Provider value={{ cache, setCache }}>
         {checkingToken || networkFailure
           ? <Loading networkFailure={networkFailure} />
-          : token ? <></> : <Home />}
+          : token ? <Todos /> : <Home />}
       </CacheContext.Provider>
     </TokenContext.Provider>
   )
