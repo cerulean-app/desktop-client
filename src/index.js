@@ -2,14 +2,38 @@ import React, { useEffect, useState } from 'react'
 import ReactDOM from 'react-dom'
 import Loading from './loading'
 import Home from './home'
+import CacheContext from './cacheContext'
+import TokenContext from './tokenContext'
 
 const App = () => {
-  const [token, setToken] = useState(window.token)
-  const [, setCache] = useState(window.cache)
+  const [token, setTokenReact] = useState(window.token)
+  const [cache, setCacheReact] = useState(window.cache)
   const [checkingToken, setCheckingToken] = useState(!!window.token)
   const [networkFailure, setNetworkFailure] = useState(false)
-  window.setTokenReact = setToken
-  window.setCacheReact = setCache
+  window.setTokenReact = setTokenReact
+  window.setCacheReact = setCacheReact
+  const setToken = (token) => {
+    if (typeof token === 'function') {
+      return setTokenReact(prevValue => {
+        const newValue = token(prevValue)
+        window.setTokenGo(newValue)
+        return newValue
+      })
+    }
+    window.setTokenGo(token)
+    return setTokenReact(token)
+  }
+  const setCache = (cache) => {
+    if (typeof cache === 'function') {
+      return setCacheReact(prevValue => {
+        const newValue = cache(prevValue)
+        window.setCacheGo(newValue)
+        return newValue
+      })
+    }
+    window.setCacheGo(cache)
+    return setCacheReact(cache)
+  }
 
   useEffect(() => {
     if (checkingToken) {
@@ -39,9 +63,15 @@ const App = () => {
     }
   }, [checkingToken, token])
 
-  return checkingToken || networkFailure
-    ? <Loading networkFailure={networkFailure} />
-    : token ? <></> : <Home />
+  return (
+    <TokenContext.Provider value={{ token, setToken }}>
+      <CacheContext.Provider value={{ cache, setCache }}>
+        {checkingToken || networkFailure
+          ? <Loading networkFailure={networkFailure} />
+          : token ? <></> : <Home />}
+      </CacheContext.Provider>
+    </TokenContext.Provider>
+  )
 }
 
 ReactDOM.render(<App />, document.getElementById('app'))
