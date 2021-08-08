@@ -1,11 +1,13 @@
 import React, { useState } from 'react'
 import { css } from '@emotion/react'
+import Register from './register'
 import Login from './login'
-import { largeButtonStyle } from './styles'
+import { largeButtonStyle, largeButtonStylePadded } from './styles'
 
 const Home = () => {
-  const [login, setLogin] = useState(false)
-  const handleLogin = () => setLogin(l => !l)
+  const [page, setPage] = useState(null)
+  const handleLogin = () => setPage('login')
+  const handleRegister = () => setPage('register')
 
   return (
     <div css={css({ height: '100vh', display: 'flex', flexDirection: 'column' })}>
@@ -20,15 +22,18 @@ const Home = () => {
       background-color: #dfdfdf;
       height: 100%`}
       >
-        {login
-          ? <Login handleClose={() => setLogin(false)} />
-          : (
+        {page === null
+          ? (
             <>
               <h3>Cerulean is a todo app focused around keeping it simple and helping you get your work *done*. Inspired by Google Tasks.</h3>
               <div css={css({ flex: 1 })} />
+              <button css={largeButtonStylePadded} onClick={handleRegister}>Register</button>
               <button css={largeButtonStyle} onClick={handleLogin}>Login</button>
             </>
-            )}
+            )
+          : page === 'login'
+            ? <Login handleClose={() => setPage(null)} />
+            : <Register handleClose={() => setPage(null)} />}
       </div>
     </div>
   )

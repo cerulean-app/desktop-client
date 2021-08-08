@@ -32,7 +32,7 @@ ${inputStyle}:focus + & {
   color: #222;
 }` */
 
-const TextInput = (props) => {
+const TextInput = React.forwardRef((props, ref) => {
   return (
     <label css={css({
       fontSize: '14px',
@@ -41,16 +41,18 @@ const TextInput = (props) => {
       border: '8px solid transparent'
     })}
     >
-      <input css={inputStyle} type={props.type} onChange={props.onChange} value={props.value} placeholder={props.label} />
+      <input css={inputStyle} {...props} ref={ref} placeholder={props.label} />
       {/* <span css={placeholderStyle}>{props.label}</span> */}
     </label>
   )
-}
+})
 
+TextInput.displayName = 'TextInput'
 TextInput.propTypes = {
   type: PropTypes.string,
   value: PropTypes.string,
   onChange: PropTypes.func,
+  onKeyPress: PropTypes.func,
   label: PropTypes.string.isRequired
 }
 
