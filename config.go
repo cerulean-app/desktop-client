@@ -12,6 +12,17 @@ var config Config
 
 type Config struct {
 	Token string `json:"accessToken"`
+	Cache []Todo `json:"cache"`
+}
+
+type Todo struct {
+	ID          string `json:"id"`
+	Name        string `json:"name"`
+	Description string `json:"description"`
+	Done        bool   `json:"done"`
+	DueDate     string `json:"dueDate"`
+	CreatedAt   string `json:"createdAt"`
+	UpdatedAt   string `json:"updatedAt"`
 }
 
 func GetConfigFilePath() string {
@@ -34,6 +45,19 @@ func ReadConfig() {
 	err = json.Unmarshal(configFile, &config)
 	if err != nil {
 		log.Println("broken cerulean.json in config dir, using fresh config")
+		return
+	}
+}
+
+func SaveConfig() {
+	file, err := json.Marshal(config)
+	if err != nil {
+		log.Println("unable to convert config to json, not saving")
+		return
+	}
+	err = os.WriteFile(GetConfigFilePath(), file, 0644)
+	if err != nil {
+		log.Println("unable to write json config to file, not saving")
 		return
 	}
 }

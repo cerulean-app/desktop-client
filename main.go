@@ -2,6 +2,7 @@ package main
 
 import (
 	_ "embed"
+	"encoding/json"
 	"log"
 	"os"
 	"strings"
@@ -37,8 +38,6 @@ var w webview.WebView
 
 const REQ_URL string = "http://localhost:7292" // TODO: Add some config around this.
 
-// var file = ""
-
 // ParseToJsString takes a string and escapes slashes and double-quotes,
 // and converts it to a string that can be passed to JavaScript.
 func ParseToJsString(s string) string {
@@ -49,12 +48,26 @@ func ParseToJsString(s string) string {
 func SetToken(value string) {
 	config.Token = value
 	w.Eval("setTokenReact(" + ParseToJsString(value) + ")")
+	SaveConfig()
+}
+
+// SetCache sets the value of the config.Cache variable in both Go and React.
+func SetCache(cache []Todo) {
+	value, err := json.Marshal(cache)
+	if err != nil {
+		log.Println("failed to serialise []Todo to JSON to send to webview")
+		return
+	}
+	config.Cache = cache
+	w.Eval("setCacheReact(JSON.parse(" + ParseToJsString(string(value)) + "))")
+	SaveConfig()
 }
 
 func main() {
-	jsLogger := log.New(os.Stderr, "client: ", log.LstdFlags)
+	jsLogger := log.New(os.Stderr, "webview: ", log.LstdFlags)
 	log.SetPrefix("native: ")
 	ReadConfig()
+	SaveConfig()
 
 	debug := true
 	w = webview.New(debug)
@@ -63,10 +76,16 @@ func main() {
 	w.SetSize(325, 525, webview.HintMin)
 
 	// Bind variables.
-	w.Bind("setTokenGo", func(newToken string) { config.Token = newToken })
+	w.Bind("setTokenGo", func(newToken string) { config.Token = newToken; SaveConfig() })
+	w.Bind("setCacheGo", func(newToken string) { config.Token = newToken; SaveConfig() })
 
 	// Bind a function to initiate React via webview.Eval.
 	w.Bind("initiateReact", func() {
+		value, err := json.Marshal(config.Cache)
+		if err != nil {
+			log.Println("failed to serialise []Todo to JSON to send to webview")
+		}
+		w.Eval("window.cache = " + ParseToJsString(string(value)))
 		w.Eval("window.token = " + ParseToJsString(config.Token))
 		w.Eval("window.reqUrl = " + ParseToJsString(REQ_URL))
 		w.Eval(js)

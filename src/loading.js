@@ -1,7 +1,8 @@
 import React from 'react'
+// import PropTypes from 'prop-types'
 import { css } from '@emotion/react'
 
-const Loading = () => {
+const Loading = (props) => {
   // TODO: UX showing a message upon longer loads, or if there is no internet then just say there's not.
   return (
     <div css={css({ height: '100vh', display: 'flex', flexDirection: 'column' })}>
@@ -34,6 +35,10 @@ const Loading = () => {
       </div>
     </div>
   )
+}
+
+Loading.propTypes = {
+  // networkFailure: PropTypes.bool.isRequired
 }
 
 export default Loading
